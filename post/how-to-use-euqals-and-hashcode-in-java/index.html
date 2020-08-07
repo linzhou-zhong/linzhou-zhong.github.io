@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" >
+
+<title>How to use euqals() and hashCode() in Java | Chic</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="shortcut icon" href="https://linzhou-zhong.github.io/favicon.ico?v=1596838921940">
+<link rel="stylesheet" href="https://linzhou-zhong.github.io/styles/main.css">
+
+
+
+<link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+
+
+    <meta name="description" content="Hi there !
+Today I'm going to talk about one of questions that are important but easily ignore by us : equals() and hash..." />
+    <meta name="keywords" content="Java" />
+  </head>
+  <body>
+    <div id="app" class="main">
+
+      <div class="sidebar" :class="{ 'full-height': menuVisible }">
+  <div class="top-container" data-aos="fade-right">
+    <div class="top-header-container">
+      <a class="site-title-container" href="https://linzhou-zhong.github.io">
+        <img src="https://linzhou-zhong.github.io/images/avatar.png?v=1596838921940" class="site-logo">
+        <h1 class="site-title">Chic</h1>
+      </a>
+      <div class="menu-btn" @click="menuVisible = !menuVisible">
+        <div class="line"></div>
+      </div>
+    </div>
+    <div>
+      
+        
+          <a href="/" class="site-nav">
+            Home
+          </a>
+        
+      
+        
+          <a href="/archives" class="site-nav">
+            Archive
+          </a>
+        
+      
+        
+          <a href="/tags" class="site-nav">
+            Tag
+          </a>
+        
+      
+        
+          <a href="/post/about" class="site-nav">
+            About
+          </a>
+        
+      
+    </div>
+  </div>
+  <div class="bottom-container" data-aos="flip-up" data-aos-offset="0">
+    <div class="social-container">
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    </div>
+    <div class="site-description">
+      👓
+    </div>
+    <div class="site-footer">
+      Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | <a class="rss" href="https://linzhou-zhong.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main-container">
+        <div class="content-container" data-aos="fade-up">
+          <div class="post-detail">
+            <h2 class="post-title">How to use euqals() and hashCode() in Java</h2>
+            <div class="post-date">05-08-2020</div>
+            
+              <div class="feature-container" style="background-image: url('https://linzhou-zhong.github.io/post-images/how-to-use-euqals-and-hashcode-in-java.jpg')">
+              </div>
+            
+            <div class="post-content" v-pre>
+              <p>Hi there !</p>
+<p>Today I'm going to talk about one of questions that are important but easily ignore by us : <code>equals()</code> and <code>hashCode()</code> methods in Java.</p>
+<!-- more -->
+<p>I found both these methods extremly important in the development process, so if the person knows nothing about them, it can cause a lot of the issues in the application like missiong data inside the hashed data structures, wrong equality process results, etc.</p>
+<p>So, come with me and let's move on to discover these 2 methods.</p>
+<p>As you might know, there is a class <code>Object</code>, that is a parent of each other class in Java, which means that if we create a new class <code>Humanity</code> in such a way :</p>
+<pre><code class="language-java">public class Humain { 
+}
+</code></pre>
+<p>It will implicitly extend the <code>Object</code> class. That's why, even if it seems that our <code>Humain</code> class is empty, it has several methods available inherited from the <code>Object</code> class:</p>
+<ul>
+<li>equals()</li>
+<li>hashCode()</li>
+<li>toString()</li>
+<li>getClass()</li>
+<li>notify()</li>
+<li>notifyAll()</li>
+<li>wait()</li>
+</ul>
+<p>As rest of the methods are out of the scope of the current article 😅, let's focus on <code>equals()</code> and hashCode() ones.</p>
+<h1 id="equals"><em>equals()</em></h1>
+<p>So <code>equals(Object o)</code> method is used to indicate whether some other Object <code>o</code> is equal to the current object (on which the method has been invoked).</p>
+<p>The explanation looks very clear, but one question could appear: &quot;Wait, why do we need this method, we have <code>==</code> operation will be enough right ?&quot;</p>
+<p>Well, thanks for this common question, but I have to say <code>==</code> operator works perfectly for the primitive data types like <code>int</code>, <code>long</code>, <code>boolean</code>, etc. But for the non-primitive (or reference) data type (like Humanity, Animal, or even Alien👽) <code>==</code> operator shows not the equality of the objects, but whether they refer to the same object in memory. It works in such a way due to Java Memory Model (JMM) : primitives and reference objects are kept in different memory parts.</p>
+<p>Let me demonstrate this in code.</p>
+<pre><code class="language-java">public class Humanity {
+    private String name;
+
+    public Humanity(String name){
+        this.name = name;
+    }
+}
+
+class Main {
+    public static void main(String[] args) {
+        Humanity h1 = new Humanity(&quot;Linzhou&quot;);
+        Humanity h2 = new Humanity(&quot;Simpson&quot;);
+
+        System.out.println(h1 == h2);
+    }
+}
+</code></pre>
+<p>We'll have the following output:</p>
+<pre><code>false
+</code></pre>
+
+            </div>
+            
+              <div class="tag-container">
+                
+                  <a href="https://linzhou-zhong.github.io/tag/yNiF1pCzj/" class="tag">
+                    Java
+                  </a>
+                
+              </div>
+            
+            
+
+            
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+<script type="application/javascript">
+
+AOS.init();
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    menuVisible: false,
+  },
+})
+
+</script>
+
+
+
+
+
+
+  </body>
+</html>
