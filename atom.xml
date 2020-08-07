@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://linzhou-zhong.github.io</id>
     <title>Chic</title>
-    <updated>2020-08-07T22:22:03.905Z</updated>
+    <updated>2020-08-07T23:03:06.846Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://linzhou-zhong.github.io"/>
     <link rel="self" href="https://linzhou-zhong.github.io/atom.xml"/>
@@ -15,7 +15,7 @@
         <id>https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/</id>
         <link href="https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/">
         </link>
-        <updated>2020-08-05T03:29:35.000Z</updated>
+        <updated>2020-08-04T21:29:35.000Z</updated>
         <summary type="html"><![CDATA[<p>Hi there !</p>
 <p>Today I'm going to talk about one of questions that are important but easily ignore by us : <code>equals()</code> and <code>hashCode()</code> methods in Java.</p>
 ]]></summary>
@@ -28,7 +28,7 @@
 <pre><code class="language-java">public class Humain { 
 }
 </code></pre>
-<p>It will implicitly extend the <code>Object</code> class. That's why, even if it seems that our <code>Humain</code> class is empty, it has several methods available inherited from the <code>Object</code> class:</p>
+<p>It will implicitly extend the <code>Object</code> class. That's why, even if it seems that our <code>Humanity</code> class is empty, it has several methods available inherited from the <code>Object</code> class:</p>
 <ul>
 <li>equals()</li>
 <li>hashCode()</li>
@@ -63,6 +63,21 @@ class Main {
 </code></pre>
 <p>We'll have the following output:</p>
 <pre><code>false
+</code></pre>
+<p>But what would it be, if use <code>equals()</code> method to compare these 2 <code>Humanity</code> instances instead of <code>==</code> operator ?</p>
+<pre><code class="language-java">class Main {
+    public static void main (String[] args) {
+        Humanity h1 = new Humanity(&quot;Linzhou&quot;);
+        Humanity h2 = new Humanity(&quot;Simpson&quot;);
+
+        System.out.println(h1.equals(h2));
+    }
+}
+</code></pre>
+<p>Would it return <code>true</code>? Nope, the output is <code>false</code> again. How come ? The answer is simple: right now we are using the <code>Object</code> class implementation of <code>equals()</code> method,so let's take a look how it looks like:</p>
+<pre><code class="language-java">public boolean equals(Object o) {
+    return (this == o);
+}
 </code></pre>
 ]]></content>
     </entry>
