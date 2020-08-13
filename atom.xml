@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://linzhou-zhong.github.io</id>
-    <title>Chic</title>
-    <updated>2020-08-13T21:18:23.284Z</updated>
+    <title>byckles_blog</title>
+    <updated>2020-08-13T21:23:39.903Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://linzhou-zhong.github.io"/>
     <link rel="self" href="https://linzhou-zhong.github.io/atom.xml"/>
-    <subtitle>👓</subtitle>
+    <subtitle>Profitez bien et Bon Café ☕️</subtitle>
     <logo>https://linzhou-zhong.github.io/images/avatar.png</logo>
     <icon>https://linzhou-zhong.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, Chic</rights>
+    <rights>All rights reserved 2020, byckles_blog</rights>
     <entry>
         <title type="html"><![CDATA[How to use euqals() and hashCode() in Java]]></title>
         <id>https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/</id>
