@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://linzhou-zhong.github.io</id>
     <title>Linnnnn</title>
-    <updated>2020-08-31T17:08:47.275Z</updated>
+    <updated>2020-08-31T20:54:09.758Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://linzhou-zhong.github.io"/>
     <link rel="self" href="https://linzhou-zhong.github.io/atom.xml"/>
@@ -11,17 +11,348 @@
     <icon>https://linzhou-zhong.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, Linnnnn</rights>
     <entry>
+        <title type="html"><![CDATA[Immutable classes in Java]]></title>
+        <id>https://linzhou-zhong.github.io/post/immutable-classes-in-java/</id>
+        <link href="https://linzhou-zhong.github.io/post/immutable-classes-in-java/">
+        </link>
+        <updated>2020-08-31T05:12:50.000Z</updated>
+        <content type="html"><![CDATA[<p>Hi there!</p>
+<p>Now we are going to taling about immutable classes in Java and show how to make the class immutable.</p>
+<p>The class is called immutable if it is impossible to change its state and content after the initialization.</p>
+<p>The benefits of such classes are:</p>
+<ol>
+<li><em>Safety</em>: Can be sure that no one is able to change its state.</li>
+<li><em>Thread Safety</em>: The same as mentioned above is also actual for the multithreaded environment.</li>
+<li><em>Cacheable</em>: Instances could be easily cached by VM cache or custom implementation, as we are sure that their values are not going to be changed.</li>
+<li><em>Hashable</em>: Such classes could be safely put inside the hash collections (for example, <code>HashMap</code>, <code>HashSet</code> etc) and of course, if <code>equals()</code> and <code>hashCode()</code> methods are overriden in a proper way.</li>
+</ol>
+<p>So, let's try to implement the immutable class and take a look how it can be optimized step by step.</p>
+<p>Consider, we have the following class <code>Adult</code>:</p>
+<pre><code class="language-java">public class Adult {
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    public String getName(){
+        return this.name;
+    }
+
+    public void setName(String name){
+        this.name = name;
+    }
+    
+    public Address getAddress(){
+        return this.address;
+    }
+    
+    public void setAddress(Address ads){
+        this.address = ads;
+    }
+    
+    public List&lt;String&gt; getChlldren(){
+        return this.children;
+    }
+    
+    public void setChildre(List&lt;String&gt; children){
+        this.children = children;
+    }
+}
+</code></pre>
+<p>And <code>Adult</code> class has a field <code>address</code> of type <code>Address</code>:</p>
+<pre><code class="language-java">public class Address{
+    private String country;
+    private String city;
+
+    public Address(String country, String city){
+        this.country = country;
+        this.city = city;
+    }
+
+    public String getCountry(){
+        return this.country;
+    }
+
+    public void setCountry(String country){
+        this.country = country;
+    }
+
+    public String getCity(){
+        return this.city;
+    }
+
+    public void setCity(String city){
+        this.city = city;
+    }
+}
+</code></pre>
+<p>We hope <code>Address</code> class is not going to be changed, so we need firstly to remove setters of <code>Address</code>:</p>
+<h2 id="1-removing-setters">1. Removing setters:</h2>
+<pre><code class="language-java">public class Adult{
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    //getters:
+    public String getName(){
+        return this.name;
+    }
+
+    public Address getAddress(){
+        return this.address;
+    }
+
+    public List&lt;String&gt; getChildren(){
+        return this.children;
+    }
+}
+</code></pre>
+<p>Cool, looks like they can not be changed anymore. So let's provide the appropriate constructor.</p>
+<h2 id="2-adding-args-constructor">2. Adding args constructor</h2>
+<pre><code class="language-java">public class Adult{
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    public Adult(String name, Address address, List&lt;String&gt; children) {
+        this.name = name;
+        this.address = address;
+        this.children = children;
+    }
+
+    // getters
+
+    public String getName(){
+        return this.name;
+    }
+
+    public Address getAddress(){
+        return this.address;
+    }
+
+    public List&lt;String&gt; getChildren(){
+        return this.children;
+    }
+}
+</code></pre>
+<p>Have we finished now? Not yet, there are seceral issues hidden 🐭. First of all, our immutability could be modified by using one of the OOP principles : <code>Inheritance</code>. Let's see how could is it possbile :</p>
+<pre><code class="language-java">public class Cheater extends Adult {
+    private String cheaterName;
+
+    public Cheater (String name, Address address, List&lt;String&gt; children){
+        super(name, address, children);
+        cheaterName = name;
+    }
+
+    public void breakImmutability(String newName){
+        cheaterName = newName;
+        System.out.println(&quot;Immutability has been destoried&quot;);
+    }
+
+    @Override
+    public String getName(){
+        return cheaterName;
+    }
+} 
+</code></pre>
+<pre><code class="language-java">public class Main {
+    public static void main(String[] args) {
+        Cheater cheater = new Cheater(&quot;Linzhou&quot;, new Address(&quot;China&quot;, &quot;Sichuan&quot;), Collections.emptyList());
+        Adult adult = (Adult) cheater;
+
+        System.out.println(adult.getName());
+        cheater.breakImmutability(&quot;Fake Linzhou&quot;);
+        System.out.println(adult.getName());
+    }
+}
+</code></pre>
+<p>The output will be as follow :<br>
+<code>Linzhou</code><br>
+<code>Immutability has been destoried</code><br>
+<code>Fake Linzhou</code></p>
+<h2 id="3-making-class-as-final-to-protect-it-from-being-extended">3. Making class as final to protect it from being extended</h2>
+<pre><code class="language-java">public final class Aduilt {
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    // getters:
+    public String getName() {
+        return name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public List&lt;String&gt; getStuff() {
+        return stuff;
+    }
+}
+</code></pre>
+<p>The output will be :<br>
+<code>Linzhou</code><br>
+<code>Linzhou</code><br>
+And Inheritage will be no more allowed. ⚠️</p>
+<p>There is one more interesting issue : In Java when we pass the value of an object, we are passing the reference to it. So the state of the objects could be changed by the side effects. Let's check it out.</p>
+<pre><code class="language-java">public class Main {
+    public static void mian (String[] args){
+        Address ads = new Address(&quot;China&quot;,&quot;Sichuan&quot;);
+        List&lt;String&gt; children = new ArrayList&lt;&gt;();
+        children.add(&quot;child1&quot;);
+        children.add(&quot;child2&quot;);
+
+        Adult adult = new Adult(&quot;Linzhou&quot;, address, children);
+
+        System.out.println(&quot;Country: &quot; + adult.getAddress().getCountry());
+        System.out.println(&quot;City: &quot; + adult.getAddress().getCity());
+        System.out.println(&quot;Children: &quot; + adult.getChildren());
+
+        address.setCountry(&quot;France&quot;);
+        address.setCity(&quot;Paris&quot;);
+        children.remove(&quot;child1&quot;);
+        children.remove(&quot;child2&quot;);
+        System.out.println(&quot;Immutability has been destoried&quot;);
+         System.out.println(&quot;Country: &quot; + adult.getAddress().getCountry());
+        System.out.println(&quot;City: &quot; + adult.getAddress().getCity());
+        System.out.println(&quot;Children: &quot; + adult.getChildren());
+    }
+}
+</code></pre>
+<p>The output will be :<br>
+<code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code><br>
+<code>Immutability has been destoried</code><br>
+<code>Country: France</code><br>
+<code>City: Paris</code><br>
+<code>Children: []</code></p>
+<p>The issue could be fixed by:</p>
+<h2 id="4-initializing-all-non-primitive-mutable-fields-via-constructor-by-performing-a-deep-copy">4. Initializing all non-primitive mutable fields via constructor by performing a deep copy</h2>
+<pre><code class="language-java">public final class Adult {
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    public Aduilt (String name, Address address, List&lt;String&gt; Children) {
+        this.name = name;
+        this.address = new Address(address.getCountru(), address.getCity());
+        this.children = new ArrayList&lt;&gt;(children);
+    }
+
+    //getters:
+    public String getNmae(){
+        return name;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public List&lt;String&gt; getChildren() {
+        return children;
+    }
+}
+</code></pre>
+<p>Now the output of Main class is more predictable:<br>
+<code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code><br>
+<code>Immutability has been destoried</code><br>
+<code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code><br>
+But nothing is changed right ? 😄 I hope so that but there have same side effect issue could be produced through getter methods :</p>
+<pre><code class="language-java">public class Main {
+    public static void main (String[] args) {
+        Address ads = new Address(&quot;China&quot;,&quot;Sichuan&quot;);
+        List&lt;String&gt; children = new ArrayList&lt;&gt;();
+        children.add(&quot;child1&quot;);
+        children.add(&quot;child2&quot;);
+
+        Adult adult = new Adult(&quot;Linzhou&quot;, address, children);
+
+        System.out.println(&quot;Country: &quot; + adult.getAddress().getCountry());
+        System.out.println(&quot;City: &quot; + adult.getAddress().getCity());
+        System.out.println(&quot;Children: &quot; + adult.getChildren());
+
+        Address ads = adult.getAddress();
+        ads.setCountry(&quot;France&quot;);
+        ads.setCity(&quot;Paris&quot;);
+
+        List&lt;String&gt; cld = adult.getChildren();
+        cld.remove(&quot;child1&quot;);
+        cld.remove(&quot;child2&quot;);
+
+        System.out.println(&quot;Immutability has been destoried&quot;);
+         System.out.println(&quot;Country: &quot; + adult.getAddress().getCountry());
+        System.out.println(&quot;City: &quot; + adult.getAddress().getCity());
+        System.out.println(&quot;Children: &quot; + adult.getChildren());
+    }
+}
+</code></pre>
+<p><code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code><br>
+<code>Immutability has been destoried</code><br>
+<code>Country: France</code><br>
+<code>City: Paris</code><br>
+<code>Children: []</code><br>
+``</p>
+<p>So, it goes with another step to be done:</p>
+<h2 id="5-performing-cloning-of-the-returned-non-primitive-mutable-object-in-getter-methods">5. Performing cloning of the returned non-primitive mutable object in getter methods</h2>
+<pre><code class="language-java">
+public final class Adult {
+    private String name;
+    private Address address;
+    private List&lt;String&gt; children;
+
+    public Aduilt(String name, Address address, List&lt;String&gt; children) {
+        this.name = name;
+        this.address = new Address(address.getCountry(), address.getCity());
+        this.children = new ArrayList&lt;&gt;(children);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public Address getAddress() {
+        return new Address(address.getCountry(), address.getCity());
+    }
+
+    public List&lt;String&gt; getChildren () {
+        return new ArrayList&lt;&gt;(children);
+    }
+}
+</code></pre>
+<p>Now the output is :<br>
+<code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code><br>
+<code>Immutability has been destoried</code><br>
+<code>Country: China</code><br>
+<code>City: Sichuan</code><br>
+<code>Children: [child1, child2]</code></p>
+<p>There is one more optional step to be done, and to make all class fields as final.</p>
+<p>Let's summarize out steps:</p>
+<ol>
+<li>Removing setters.</li>
+<li>Adding all args constructor.</li>
+<li>Marking the class as <code>final</code> to protect it from being extended.</li>
+<li>Initializing all non-primitive mutable fields vias constructor by performing a deep copy.</li>
+<li>Performing cloning of the the returned non-prmitive mutable object in getter methods.</li>
+<li>Marking all class fields as <code>final</code> (optional)</li>
+</ol>
+]]></content>
+    </entry>
+    <entry>
         <title type="html"><![CDATA[How to use euqals() and hashCode() in Java]]></title>
         <id>https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/</id>
         <link href="https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/">
         </link>
-        <updated>2020-08-04T15:29:35.000Z</updated>
-        <summary type="html"><![CDATA[<p>Hi there !</p>
-<p>Today I'm going to talk about one of questions that are important but easily ignore by us : <code>equals()</code> and <code>hashCode()</code> methods in Java.</p>
-]]></summary>
+        <updated>2020-08-04T03:29:35.000Z</updated>
         <content type="html"><![CDATA[<p>Hi there !</p>
 <p>Today I'm going to talk about one of questions that are important but easily ignore by us : <code>equals()</code> and <code>hashCode()</code> methods in Java.</p>
-<!-- more -->
 <p>I found both these methods extremly important in the development process, so if the person knows nothing about them, it can cause a lot of the issues in the application like missiong data inside the hashed data structures, wrong equality process results, etc.</p>
 <p>So, come with me and let's move on to discover these 2 methods.</p>
 <p>As you might know, there is a class <code>Object</code>, that is a parent of each other class in Java, which means that if we create a new class <code>Humanity</code> in such a way :</p>
