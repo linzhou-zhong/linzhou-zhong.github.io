@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://linzhou-zhong.github.io</id>
     <title>Linnnnn</title>
-    <updated>2020-08-13T21:31:25.718Z</updated>
+    <updated>2020-08-31T16:57:55.892Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://linzhou-zhong.github.io"/>
     <link rel="self" href="https://linzhou-zhong.github.io/atom.xml"/>
@@ -15,7 +15,7 @@
         <id>https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/</id>
         <link href="https://linzhou-zhong.github.io/post/how-to-use-euqals-and-hashcode-in-java/">
         </link>
-        <updated>2020-08-04T21:29:35.000Z</updated>
+        <updated>2020-08-04T15:29:35.000Z</updated>
         <summary type="html"><![CDATA[<p>Hi there !</p>
 <p>Today I'm going to talk about one of questions that are important but easily ignore by us : <code>equals()</code> and <code>hashCode()</code> methods in Java.</p>
 ]]></summary>
@@ -77,6 +77,244 @@ class Main {
 <p>Would it return <code>true</code>? Nope, the output is <code>false</code> again. How come ? The answer is simple: right now we are using the <code>Object</code> class implementation of <code>equals()</code> method,so let's take a look how it looks like:</p>
 <pre><code class="language-java">public boolean equals(Object o) {
     return (this == o);
+}
+</code></pre>
+<p>As we see, it calls the == operator under the hood, so the false output looks more clear more.</p>
+<p>Of course, this implementation doesn't satisfy our needs, so we can override it.</p>
+<p>But first let's postpone the overriding process a little bit to learn several equals() method rules, that are going to help us in our implementation:</p>
+<ol>
+<li>Reflexive: <code>a.equals(a)</code> must always return <code>true</code> (of course, if <code>a != null</code>, otherwise <code>NullPointeException will be thrown</code>);</li>
+<li>Symmetric: if <code>a.equals(b)</code> return <code>true</code>, then <code>b.equals(a)</code> must always return <code>true</code> as well.</li>
+<li>Transitive: if <code>a.equals(b)</code> returns <code>true</code> and <code>a.equals(c)</code> returns <code>true</code>, it means, that <code>b.equals(c)</code> must be <code>true</code> as well.</li>
+<li>Consistent: if <code>a.equals(b)</code> return <code>true</code> (or <code>false</code>) and neither <code>a</code> nor <code>b</code> has been changed, <code>a.equals(b)</code> should always return the same result.</li>
+</ol>
+<p>The rules are simple and intuitive, but anyway it is extremely important to follow them to omit the possbile issues in the apllication.</p>
+<p>Let's get back to our <code>Humanity</code> comparison problem:<br>
+I propose not to hurry up, but take a look at the method signature to think, how to override it correctly. As you might have noticed, <code>equals()</code> method accepts <code>Object o</code> as a parameter, so it will be impossible to write something like this:</p>
+<pre><code class="language-java">@Override
+public boolean equals(Object o){
+    return this.name.equals(o.name);
+}
+</code></pre>
+<p>as <code>Object</code> class knows notoriously nothing about name property - compiler error. Also, this code could throw <code>NullPointException</code> if <code>name == null</code> or <code>o == null</code>. And, yes, we could write something like this:</p>
+<pre><code class="language-java">public boolean equals(Humanity h){
+    return name.equals(h.name);
+}
+</code></pre>
+<p>But it will not the overriding, but the overloading.<br>
+There are a lot of librairies and APIs, that use <code>equals()</code> method under the hood, so as you might have understood, they know nothing about our overloading version of the <code>equals()</code> method, but will call that one from the <code>Object</code> class and our comparison issue will appear again. It means that the overloading is not an appropriate solution for our case.</p>
+<p>As we have seen before, the <code>Object</code> class <code>equals()</code> implementation uses <code>==</code> operator to compare the objects. If two objects point to the same object in memory, they are definitely equal. It's a good point to start our overriding.</p>
+<ol>
+<li>Compare objects using <code>==</code> operator.</li>
+</ol>
+<pre><code class="language-java">@Override
+public boolean equals(Object o){
+    return this == o;
+}
+</code></pre>
+<p>We have mentioned above, that we could face the <code>NullPointException</code> if <code>Object o</code> is equal to <code>null</code>. Alse, we do know, that our current object (<code>Humanity</code> instance, on which we are going to call <code>equals()</code> method) is not <code>null</code> for sure, as otherwise the <code>NullPointException</code> will be thrown on method call on <code>null</code> <code>Humanity</code> instance, but it is not our business right now. It goes with another step:</p>
+<ol start="2">
+<li>Check, whether the Object o parameter is not null. If yes, return false.</li>
+</ol>
+<pre><code class="language-java">@Override
+public boolean equuals(Object o){
+    if (this == o)
+        return true;
+    if (o == null)
+        return false;
+    return true;
+}
+</code></pre>
+<p>Looks better, but not enough. As we have mentioned before, there is one more difficulty left: <code>o</code> is <code>Object</code> type, so it's impossible to reach <code>Humanity</code> data from it. Of course, we could cast it to <code>Humanity</code> and it seems that we are good to go. But, unfortunately, it is not safe. Just take a look at the code:</p>
+<pre><code class="language-java">@Override
+public boolean equals(Object o){
+    if (this == o)
+        return true;
+    if (o == null)
+        return false;
+    Hummanity h = (Humanity) o;
+    return this.name.equals(h.name);
+}
+</code></pre>
+<p>Let me introduce the new class <code>Dog</code>:</p>
+<pre><code class="language-java">public class Dog{
+    private String name;
+
+    public Dog(String name)
+        this.name = name;
+}
+</code></pre>
+<p>Take a look how to break our <code>equals()</code> implementation:</p>
+<pre><code class="language-java">class Main{
+    public static void main (String[] args){
+        Humanity h = new Humanity(&quot;Linzhou&quot;);
+        Dog dog = new Dog(&quot;poppy&quot;);
+
+        System.out.println(h.equals(dog));
+    }
+}
+</code></pre>
+<p>Unfortunately there is no compile error, as even <code>dog</code> is <code>Dog</code> type, but it is an <code>Object</code> type as well(<code>Object</code> is a parent of each class), so it is allowed to pass the <code>dog</code> inside our method. But if we run this code, we'll have an exception:</p>
+<p><code>Exception in thread &quot;main&quot; java.lang.ClassCastException: Dog cannot be cast to Humanity</code></p>
+<p>How can we cast a dog to a humanity, which makes no sense right ?</p>
+<ol start="3">
+<li>Check, whether the Object o parameter has the same type, as our instance. If no, return false.</li>
+</ol>
+<pre><code class="language-java">@Override
+public boolean equals(Object o){
+    if (this == o)
+        return true;
+    if (o == null)
+        return false;
+    if (this.getClass() != o.getClass())
+        return false;
+
+    return true;
+}
+</code></pre>
+<p>Here we have used <code>getClass()</code> method, that comes from the <code>Object</code> class. This method just returns the <code>Class</code> of the object, that calls it. So for dog.getClass(); it returns <code>Dog</code>, for <code>h.getClass()</code> which returns <code>Humanity</code> and so on.</p>
+<ol start="4">
+<li>Cast the Object to the current class</li>
+<li>Compare the chosen fields values.</li>
+</ol>
+<pre><code class="language-java">@Override
+public boolean equals(Object o){
+    if (this == o)
+        return true;
+    if (o == null)
+        return false;
+    if (this.getClass() != o.getClass())
+        return false;
+    Humanity h = (Humanity) o;
+    return Objects.equals(this.name, h.name);
+}
+</code></pre>
+<p>We have used <code>Objects.equals()</code> method here to simplify the logic and omit this.name null checking, as it has been already implemented inside the used method of <code>Objects</code> class:</p>
+<pre><code class="language-java">public static boolean equals(Object a, object b){
+    return (a == b) || (a != null &amp;&amp; a.equals(b));
+}
+</code></pre>
+<p>Let's try to check, whether it works correctly:</p>
+<pre><code class="language-java">class Main {
+    public static void main(String[] args){
+        Humanity h1 = new Humanity(&quot;Linzhou&quot;);
+        Humanity h2 = new Humanity(&quot;Linzhou&quot;);
+        Dog dog = new Dog(&quot;poppy&quot;);
+
+        System.out.println(h1.equals(h2));
+        System.out.println(h1.equals(dog));
+    }
+}
+</code></pre>
+<p>The output is finnaly predictable:<br>
+<code>true</code> and <code>false</code>.</p>
+<p>For now, that's for the <code>equals()</code> method, but we'll return to it a little bit later. Let's move on to <code>hasCode()</code>.</p>
+<h1 id="hashcode"><em>hashCode()</em></h1>
+<p><code>hashCode()</code> method returns a hash code value of the object. Hash code, for now, is some int value. And that's it.</p>
+<p>Let's try to see how it works to make it more clear. I propose to use our well-known <code>Humanity</code> class for this:</p>
+<pre><code class="language-java">class Main {
+    public static void main(String[] args){
+        Humanity h = new Humanity(&quot;Linzhou&quot;);
+        int hashCode = h.hashCode();
+        System.out.println(hashCode);
+    }
+}
+</code></pre>
+<p>The output will be different from several computers. But how could is it possbile ?<br>
+To answer this question, we need to remember that we haven't overridden the <code>hashCode()</code> method yet, so we are using the <code>Object</code> implementation now. If we go to the <code>Object</code> class, we'll see the following:</p>
+<pre><code class="language-java">public native int jashCode();
+</code></pre>
+<p>First, <code>native</code> in Java is used with methods to indicate, that the method is implemented in other languages (for example, C or C ++). It is possbile to call such methods using JNI. Such methods are used for te performance reasons or to access system or hardware resources, that is not possible to proceed using Java.</p>
+<p>Bref, let's make this method behave predictably by overriding it:</p>
+<pre><code class="language-java">@Override
+public int hashCode() {
+    return 50;
+}
+Class Main {
+    public static void main(String[] args){
+        Humanity h = new Humanity(&quot;Linzhou&quot;);
+        int hashCode = h.hashCode();
+        System.out.orintln(hasCode);
+    }
+}
+</code></pre>
+<p>As we might expect, the output is <code>50</code>.</p>
+<p>Let's me present several <code>hashCode()</code> method rules and I hope we can understant why we need <code>equals()</code> combined with <code>hashCode()</code>.</p>
+<ol>
+<li>Each invocation of <code>hashCode()</code> method on the same object that hasn't been changed must produce the same result each time.</li>
+<li>If twi objects are equal through the <code>equals()</code> method, then invoking the <code>hashCode()</code> method on each of these two objects must produce the same result:</li>
+</ol>
+<pre><code class="language-java">// if : 
+a.equals(b) is true
+//then :
+a.hashCode() == b.hashCode()
+</code></pre>
+<ol start="3">
+<li>but if invoking the <code>hashCode()</code> method on two objects produces the same result, it doesn't mean that both of them are equal (through <code>equals()</code> method). Because, the <code>int</code> type has a limited scope of the values from -2147483648 to 2147483647, which means if we have a number of objects over than its limited scope and it will create a pair of hashCode with same values of two objects even if both of them are completely not the same type.</li>
+</ol>
+<p>So as we have noticed, the 2nd and 3rd rules show that <code>equals()</code> and <code>hashCode()</code> are connected.</p>
+<p>Let's go deeper, hashed collections can provide fast access to elements (Time complexity O(1)). The most popular Java Hashed collections is <code>HashMap</code>. It is used to keep 'key - value' pairs.</p>
+<pre><code class="language-java">Map&lt;Integer, String&gt; map = new HashMap&lt;&gt;();
+map.put(1, &quot;Hello&quot;);
+map.put(2, &quot;Bonjour&quot;);
+map.put(3, &quot;Hola&quot;);
+</code></pre>
+<p>If we need to get the third pair:</p>
+<pre><code class="language-java">String str = map.get(3);
+System.out.println(str);
+</code></pre>
+<p>The output is <code>Hola</code>.</p>
+<p>When <code>put(Key k, Value v)</code> method is called, the following steps are performed under the hood:</p>
+<ol>
+<li>If <code>key</code> is <code>null</code>, the key-value pair (Entry) is put into the first bucket.</li>
+<li>If not <code>null</code>, the <code>hashCode()</code> method is called on the key.</li>
+<li><code>HashMap</code> takes the key hash value, processes it through the internal computations to get the number of the bucket to be used.</li>
+<li>If the chosen bukcet is empty, the <code>Entry</code> is put there.</li>
+<li>If the bucket is not empty, it iterates through all the existing entries inside the bucket and pares their keys with key from the <code>put()</code> method using <code>equals()</code>.</li>
+<li>if equals() returns <code>false</code> for each iteration, the <code>Entry</code> will be stored in the current bucket.</li>
+<li>if equals() returns <code>true</code> for some case, so the <code>Entry</code> has the same key as from the <code>put()</code> method, this <code>Entry</code> value will be replaced by the new value.</li>
+</ol>
+<p>When <code>get(Key k)</code> method is called:</p>
+<ol>
+<li>If key is <code>null</code>, we go to the first bucket and look for the <code>Entry</code> with the key == null, if exists, its <code>value</code> is returned.</li>
+<li>If key is not <code>null</code>, the <code>hashCode()</code> method is called on the <code>key</code>.</li>
+<li><code>hashMap</code> takes the <code>key</code> hash value, processes it throught the internal compuattions get get the number of the bucket to be used.</li>
+<li>If the bucket is empty, return <code>null</code>.</li>
+<li>if Bucket contains several elements, we iterate through each of them and compare equals() the key of each <code>Entry</code> with our <code>key</code>. If <code>true</code> return matching <code>Entry value</code>, else return <code>null</code>.</li>
+</ol>
+<p>So, we have just seen that the <code>equals()</code> and <code>hashCode()</code> methods work together inside the <code>HashMap</code> to get and put the data: <code>hashCode()</code> is used to compute the bucket number and <code>equals()</code> is used to find the <code>Entry</code> with the same key.</p>
+<p>Now we know more than enough to implement the <code>hashCode()</code> and <code>equals()</code> methods.</p>
+<pre><code class="language-java">@Override
+public int hashCode(){
+    return Objects.hash(idNumber);
+}
+</code></pre>
+<p>And the final version :</p>
+<pre><code class="language-java">public class Humanity {
+    private long idNumber;
+    private String name;
+
+    public Humanity(long idNumber, String name){
+        this.idNumber = idNmber;
+        this.name = name;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if (this == o)
+            return true;
+        if (o == null)
+            return false;
+        if (this.getClass() != o.getClass())
+            return false;
+        Humanity h = (Humanity) o;
+        return this.idNumber == h.idNumber;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(idNumber);
+    }
 }
 </code></pre>
 ]]></content>
