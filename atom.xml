@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://linzhou-zhong.github.io</id>
     <title>Linnnnn</title>
-    <updated>2020-09-01T14:22:56.562Z</updated>
+    <updated>2020-09-01T14:23:24.904Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://linzhou-zhong.github.io"/>
     <link rel="self" href="https://linzhou-zhong.github.io/atom.xml"/>
@@ -15,9 +15,9 @@
         <id>https://linzhou-zhong.github.io/post/checked-and-unchecked-exceptions-in-java/</id>
         <link href="https://linzhou-zhong.github.io/post/checked-and-unchecked-exceptions-in-java/">
         </link>
-        <updated>2020-08-31T19:36:30.000Z</updated>
+        <updated>2020-08-31T07:36:30.000Z</updated>
         <content type="html"><![CDATA[<p>Hi there !</p>
-<p>I'm recently reading some books and preparing for the OCA Certification Test and I really want to share some interesting and important parts which are always omitted by us.</p>
+<p>I'm recently reading some books and preparing for the OCA Certification Test and I really want to share some interesting and important parts which are always omitted by us. 👻</p>
 <p>In Java, there are two types of exceptions:</p>
 <h2 id="1-checked-exception">1. Checked Exception</h2>
 <p>They are the exceptions that are checked at compile time. If some code within a method throws a checked exception, then the method must either handle the exception or it must specify the exception using <code>throws</code> keyword.</p>
